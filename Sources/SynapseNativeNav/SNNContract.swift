@@ -6,6 +6,9 @@ import UIKit
 public protocol SNNEntry: NSObjectProtocol {
     var uid: Int64 { get }
 
+    /// True for a screen that fills the display: the shell shows no bars over it and offers no system back.
+    var isFullScreen: Bool { get }
+
     /// The same instance on every call, so SwiftUI re-evaluation never rebuilds the screen.
     func viewController() -> UIViewController
 
@@ -19,10 +22,13 @@ public protocol SNNEntry: NSObjectProtocol {
     func performLeadingAction()
 }
 
-/// Told about the pops the user makes natively: the back chevron and swipe-back.
+/// Told about what the user does natively: pops, by the back chevron and swipe-back, and choosing a tab.
 @objc(SNNHost)
 @MainActor
 public protocol SNNHost: NSObjectProtocol {
     @objc(nativeStackChangedForTab:entries:)
     func nativeStackChanged(forTab tabId: String, entries: [any SNNEntry])
+
+    @objc(tabSelected:)
+    func tabSelected(_ tabId: String)
 }

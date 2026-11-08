@@ -21,10 +21,10 @@ In Xcode, choose **File > Add Package Dependencies**, add the URL below, and lin
 https://github.com/ribads/synapse-native-nav-kmp
 ```
 
-Use the dependency rule **Up to Next Minor Version** from `0.0.1`. In a `Package.swift`:
+Use the dependency rule **Up to Next Minor Version** from `0.0.2`. In a `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/ribads/synapse-native-nav-kmp", .upToNextMinor(from: "0.0.1"))
+.package(url: "https://github.com/ribads/synapse-native-nav-kmp", .upToNextMinor(from: "0.0.2"))
 ```
 
 ## Use it
@@ -46,8 +46,8 @@ The package knows nothing about Kotlin. A versioned package can't depend on the 
 | Type | Role |
 | --- | --- |
 | `SNNShell` | Builds the root view controller and receives paths, tab selection, badges and chrome from the host. |
-| `SNNHost` | Implemented by the host. Told about the pops the user makes natively, the back chevron and swipe-back. |
-| `SNNEntry` | Implemented by the host. One screen: its view controller, and the taps and insets it receives. |
+| `SNNHost` | Implemented by the host. Told what the user does natively: pops, by the back chevron and swipe-back, and choosing a tab. |
+| `SNNEntry` | Implemented by the host. One screen: its view controller, whether it fills the display with no bars, and the taps and insets it receives. |
 | `SNNTab`, `SNNChrome`, `SNNChromeAction`, `SNNChromeMenuItem` | Value objects describing tabs and each screen's navigation bar. |
 
 The host owns each tab's path and publishes it whole. SwiftUI assigns it to the `NavigationStack` and reports its own pops back, so the two stay in step.

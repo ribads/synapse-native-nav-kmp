@@ -5,6 +5,7 @@ import XCTest
 @MainActor
 private final class FakeEntry: NSObject, SNNEntry {
     let uid: Int64
+    let isFullScreen = false
 
     init(uid: Int64) {
         self.uid = uid
@@ -19,9 +20,14 @@ private final class FakeEntry: NSObject, SNNEntry {
 @MainActor
 private final class FakeHost: NSObject, SNNHost {
     var reported: [[Int64]] = []
+    var selected: [String] = []
 
     func nativeStackChanged(forTab tabId: String, entries: [any SNNEntry]) {
         reported.append(entries.map(\.uid))
+    }
+
+    func tabSelected(_ tabId: String) {
+        selected.append(tabId)
     }
 }
 
@@ -46,6 +52,15 @@ final class NavigationModelTests: XCTestCase {
         XCTAssertEqual(model.selection, "home")
         XCTAssertEqual(model.path(for: "home"), [])
         XCTAssertEqual(model.path(for: "memos"), [])
+    }
+
+    func testChoosingATabIsReportedOnce() {
+        let model = model()
+
+        model.selection = "memos"
+        model.selection = "memos"
+
+        XCTAssertEqual(host.selected, ["memos"])
     }
 
     func testAPathFromTheHostIsAppliedWithoutEchoingBack() {

@@ -49,10 +49,10 @@ final class ObjectiveCContractTests: XCTestCase {
 
     func testProtocolsKeepTheirRequirements() {
         assertRequired(
-            ["uid", "viewController", "setContentInsetsTop:bottom:", "performAction:", "performLeadingAction"],
+            ["uid", "isFullScreen", "viewController", "setContentInsetsTop:bottom:", "performAction:", "performLeadingAction"],
             in: SNNEntry.self
         )
-        assertRequired(["nativeStackChangedForTab:entries:"], in: SNNHost.self)
+        assertRequired(["nativeStackChangedForTab:entries:", "tabSelected:"], in: SNNHost.self)
     }
 
     func testEnumsKeepTheirRawValues() {

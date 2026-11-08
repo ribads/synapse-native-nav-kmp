@@ -20,14 +20,15 @@ struct TabStackView: View {
         let chrome = model.chromes[entry.uid]
         let title: String = chrome?.title ?? (isRoot ? tab.title : "")
         let subtitle: String = chrome?.subtitle ?? ""
-        let barVisibility: Visibility = isRoot && chrome == nil ? .hidden : .automatic
+        let barVisibility: Visibility = entry.isFullScreen || (isRoot && chrome == nil) ? .hidden : .automatic
 
         return insetReportingScreen(entry)
             .navigationTitle(title)
             .navigationSubtitle(subtitle)
             .toolbarTitleDisplayMode(titleDisplayMode(chrome, isRoot: isRoot))
             .toolbar(barVisibility, for: .navigationBar)
-            .navigationBarBackButtonHidden(hidesSystemBack(chrome))
+            .toolbar(entry.isFullScreen ? .hidden : .automatic, for: .tabBar)
+            .navigationBarBackButtonHidden(entry.isFullScreen || hidesSystemBack(chrome))
             .toolbar {
                 ChromeToolbar(chrome: chrome, entry: entry)
             }
@@ -43,7 +44,7 @@ struct TabStackView: View {
         return chrome.leading != .back
     }
 
-    // Only the hosted view ignores the safe area, so the proxy still reports how far the native bars overlap it.
+    // The proxy reports how far the native bars overlap the screen, and leaves the keyboard to Compose.
     private func insetReportingScreen(_ entry: any SNNEntry) -> some View {
         GeometryReader { proxy in
             ComposeScreenView(viewController: entry.viewController())
@@ -53,6 +54,7 @@ struct TabStackView: View {
                     report(insets, for: entry)
                 }
         }
+        .ignoresSafeArea(.keyboard)
     }
 
     private func report(_ insets: EdgeInsets, for entry: any SNNEntry) {

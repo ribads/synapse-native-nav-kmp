@@ -7,7 +7,11 @@ import SwiftUI
 @Observable
 final class NavigationModel: ShellSink {
     let tabs: [SNNTab]
-    var selection: String
+    var selection: String {
+        didSet {
+            if selection != oldValue { host.tabSelected(selection) }
+        }
+    }
     var paths: [String: [RouteEntry]]
     var chromes: [Int64: SNNChrome] = [:]
     var tabBadges: [String: String] = [:]
