@@ -55,6 +55,8 @@ struct TabStackView: View {
                 }
         }
         .ignoresSafeArea(.keyboard)
+        // SwiftUI reuses a destination at the same depth, which would keep showing the screen this one replaced.
+        .id(entry.uid)
     }
 
     private func report(_ insets: EdgeInsets, for entry: any SNNEntry) {
