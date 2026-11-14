@@ -21,6 +21,7 @@ private final class FakeEntry: NSObject, SNNEntry {
 private final class FakeHost: NSObject, SNNHost {
     var reported: [[Int64]] = []
     var selected: [String] = []
+    var actions: [String] = []
 
     func nativeStackChanged(forTab tabId: String, entries: [any SNNEntry]) {
         reported.append(entries.map(\.uid))
@@ -28,6 +29,10 @@ private final class FakeHost: NSObject, SNNHost {
 
     func tabSelected(_ tabId: String) {
         selected.append(tabId)
+    }
+
+    func tabActionSelected(_ actionId: String) {
+        actions.append(actionId)
     }
 }
 
@@ -42,8 +47,12 @@ final class NavigationModelTests: XCTestCase {
         SNNTab(identifier: identifier, title: identifier, sfSymbol: nil, image: nil, root: FakeEntry(uid: rootUid))
     }
 
+    private func action(_ identifier: String) -> SNNTabAction {
+        SNNTabAction(identifier: identifier, title: identifier, sfSymbol: nil, image: nil)
+    }
+
     private func model() -> NavigationModel {
-        NavigationModel(host: host, tabs: [tab("home", rootUid: 1), tab("memos", rootUid: 2)])
+        NavigationModel(host: host, items: [tab("home", rootUid: 1), action("compose"), tab("memos", rootUid: 2)])
     }
 
     func testTheFirstTabStartsSelectedWithEmptyPaths() {
@@ -52,6 +61,38 @@ final class NavigationModelTests: XCTestCase {
         XCTAssertEqual(model.selection, "home")
         XCTAssertEqual(model.path(for: "home"), [])
         XCTAssertEqual(model.path(for: "memos"), [])
+    }
+
+    func testAnActionAheadOfEveryTabDoesNotStartSelected() {
+        let model = NavigationModel(host: host, items: [action("compose"), tab("home", rootUid: 1)])
+
+        XCTAssertEqual(model.selection, "home")
+    }
+
+    func testChoosingATabSelectsIt() {
+        let model = model()
+
+        model.choose("memos")
+
+        XCTAssertEqual(model.selection, "memos")
+        XCTAssertEqual(host.selected, ["memos"])
+    }
+
+    func testChoosingAnActionReportsItAndKeepsTheSelectedTab() {
+        let model = model()
+
+        model.choose("compose")
+
+        XCTAssertEqual(model.selection, "home")
+        XCTAssertEqual(host.actions, ["compose"])
+        XCTAssertEqual(host.selected, [])
+    }
+
+    func testOnlyTabsHaveAStack() {
+        let model = model()
+
+        XCTAssertEqual(model.tabs.map(\.identifier), ["home", "memos"])
+        XCTAssertEqual(model.items.map(\.identifier), ["home", "compose", "memos"])
     }
 
     func testChoosingATabIsReportedOnce() {

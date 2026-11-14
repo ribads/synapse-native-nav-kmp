@@ -5,29 +5,36 @@ struct NativeShellView: View {
     let model: NavigationModel
 
     var body: some View {
-        @Bindable var model = model
-        TabView(selection: $model.selection) {
-            ForEach(model.tabs, id: \.identifier) { tab in
-                Tab(value: tab.identifier) {
-                    TabStackView(model: model, tab: tab)
+        TabView(selection: Binding(get: { model.selection }, set: { model.choose($0) })) {
+            ForEach(model.items, id: \.identifier) { item in
+                Tab(value: item.identifier) {
+                    tabContent(item)
                 } label: {
                     Label {
-                        Text(tab.title)
+                        Text(item.title)
                     } icon: {
-                        tabIcon(tab)
+                        tabIcon(item)
                     }
                 }
-                .badge(model.tabBadges[tab.identifier].map(Text.init))
+                .badge(model.tabBadges[item.identifier].map(Text.init))
             }
         }
         .tabBarMinimizeBehavior(.automatic)
     }
 
+    // An action never becomes the selection, so it has no content to show.
     @ViewBuilder
-    private func tabIcon(_ tab: SNNTab) -> some View {
-        if let sfSymbol = tab.sfSymbol {
+    private func tabContent(_ item: SNNTabItem) -> some View {
+        if let tab = item as? SNNTab {
+            TabStackView(model: model, tab: tab)
+        }
+    }
+
+    @ViewBuilder
+    private func tabIcon(_ item: SNNTabItem) -> some View {
+        if let sfSymbol = item.sfSymbol {
             Image(systemName: sfSymbol)
-        } else if let image = tab.image {
+        } else if let image = item.image {
             Image(uiImage: image).renderingMode(.template)
         }
     }

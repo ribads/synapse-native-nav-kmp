@@ -22,16 +22,23 @@ final class ObjectiveCContractTests: XCTestCase {
 
     func testClassesKeepTheirObjectiveCNames() {
         XCTAssertEqual(NSStringFromClass(SNNShell.self), "SNNShell")
+        XCTAssertEqual(NSStringFromClass(SNNTabItem.self), "SNNTabItem")
         XCTAssertEqual(NSStringFromClass(SNNTab.self), "SNNTab")
+        XCTAssertEqual(NSStringFromClass(SNNTabAction.self), "SNNTabAction")
         XCTAssertEqual(NSStringFromClass(SNNChrome.self), "SNNChrome")
         XCTAssertEqual(NSStringFromClass(SNNChromeAction.self), "SNNChromeAction")
         XCTAssertEqual(NSStringFromClass(SNNChromeMenuItem.self), "SNNChromeMenuItem")
     }
 
+    func testTabsAndActionsAreTabItems() {
+        XCTAssertTrue(SNNTab.self.isSubclass(of: SNNTabItem.self))
+        XCTAssertTrue(SNNTabAction.self.isSubclass(of: SNNTabItem.self))
+    }
+
     func testTheShellKeepsItsSelectors() {
         XCTAssertNotNil(class_getClassMethod(SNNShell.self, NSSelectorFromString("isSupported")))
         assertInstances(of: SNNShell.self, respondTo: [
-            "initWithTabs:",
+            "initWithItems:",
             "makeViewControllerWithHost:",
             "setPath:forTab:",
             "selectTab:",
@@ -42,6 +49,7 @@ final class ObjectiveCContractTests: XCTestCase {
 
     func testValueObjectsKeepTheirInitializers() {
         assertInstances(of: SNNTab.self, respondTo: ["initWithIdentifier:title:sfSymbol:image:root:"])
+        assertInstances(of: SNNTabAction.self, respondTo: ["initWithIdentifier:title:sfSymbol:image:"])
         assertInstances(of: SNNChrome.self, respondTo: ["initWithTitle:subtitle:titleDisplay:leading:actions:"])
         assertInstances(of: SNNChromeAction.self, respondTo: ["initWithIdentifier:title:sfSymbol:image:role:enabled:menuItems:"])
         assertInstances(of: SNNChromeMenuItem.self, respondTo: ["initWithIdentifier:title:sfSymbol:image:role:enabled:"])
@@ -52,7 +60,7 @@ final class ObjectiveCContractTests: XCTestCase {
             ["uid", "isFullScreen", "viewController", "setContentInsetsTop:bottom:", "performAction:", "performLeadingAction"],
             in: SNNEntry.self
         )
-        assertRequired(["nativeStackChangedForTab:entries:", "tabSelected:"], in: SNNHost.self)
+        assertRequired(["nativeStackChangedForTab:entries:", "tabSelected:", "tabActionSelected:"], in: SNNHost.self)
     }
 
     func testEnumsKeepTheirRawValues() {

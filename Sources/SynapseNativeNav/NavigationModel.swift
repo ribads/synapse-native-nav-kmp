@@ -6,6 +6,7 @@ import SwiftUI
 @MainActor
 @Observable
 final class NavigationModel: ShellSink {
+    let items: [SNNTabItem]
     let tabs: [SNNTab]
     var selection: String {
         didSet {
@@ -17,16 +18,30 @@ final class NavigationModel: ShellSink {
     var tabBadges: [String: String] = [:]
 
     private let host: any SNNHost
+    private let actionIds: Set<String>
 
-    init(host: any SNNHost, tabs: [SNNTab]) {
+    init(host: any SNNHost, items: [SNNTabItem]) {
+        let tabs = items.compactMap { $0 as? SNNTab }
+        precondition(!tabs.isEmpty, "The tab bar needs at least one SNNTab")
         self.host = host
+        self.items = items
         self.tabs = tabs
+        self.actionIds = Set(items.compactMap { ($0 as? SNNTabAction)?.identifier })
         self.selection = tabs[0].identifier
         self.paths = Dictionary(uniqueKeysWithValues: tabs.map { ($0.identifier, [RouteEntry]()) })
     }
 
     func path(for tabId: String) -> [RouteEntry] {
         paths[tabId] ?? []
+    }
+
+    /// The person chose a tab bar item: a tab becomes the selection, an action is reported and leaves it unchanged.
+    func choose(_ itemId: String) {
+        if actionIds.contains(itemId) {
+            host.tabActionSelected(itemId)
+        } else {
+            selection = itemId
+        }
     }
 
     /// Applies a SwiftUI-side path mutation (back chevron, swipe-back) and reports what remains to the host.

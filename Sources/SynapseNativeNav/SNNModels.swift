@@ -24,22 +24,41 @@ public enum SNNChromeRole: Int, Sendable {
     case destructive
 }
 
-/// One top-level tab, with the screen at its base.
-@objc(SNNTab)
-public final class SNNTab: NSObject {
+/// One item of the tab bar: a tab with a stack of its own, or an action.
+@objc(SNNTabItem)
+public class SNNTabItem: NSObject {
     let identifier: String
     let title: String
     let sfSymbol: String?
     let image: UIImage?
-    let root: any SNNEntry
 
-    @objc(initWithIdentifier:title:sfSymbol:image:root:)
-    public init(identifier: String, title: String, sfSymbol: String?, image: UIImage?, root: any SNNEntry) {
+    init(identifier: String, title: String, sfSymbol: String?, image: UIImage?) {
         self.identifier = identifier
         self.title = title
         self.sfSymbol = sfSymbol
         self.image = image
+    }
+}
+
+/// One top-level tab, with the screen at its base.
+@objc(SNNTab)
+public final class SNNTab: SNNTabItem {
+    let root: any SNNEntry
+
+    @objc(initWithIdentifier:title:sfSymbol:image:root:)
+    public init(identifier: String, title: String, sfSymbol: String?, image: UIImage?, root: any SNNEntry) {
         self.root = root
+        super.init(identifier: identifier, title: title, sfSymbol: sfSymbol, image: image)
+    }
+}
+
+/// A tab bar item with no tab of its own: choosing it is reported to the host, and the selected tab stays selected.
+@objc(SNNTabAction)
+public final class SNNTabAction: SNNTabItem {
+
+    @objc(initWithIdentifier:title:sfSymbol:image:)
+    override public init(identifier: String, title: String, sfSymbol: String?, image: UIImage?) {
+        super.init(identifier: identifier, title: title, sfSymbol: sfSymbol, image: image)
     }
 }
 

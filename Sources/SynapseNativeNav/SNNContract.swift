@@ -22,7 +22,8 @@ public protocol SNNEntry: NSObjectProtocol {
     func performLeadingAction()
 }
 
-/// Told about what the user does natively: pops, by the back chevron and swipe-back, and choosing a tab.
+/// Told about what the user does natively: pops, by the back chevron and swipe-back, choosing a tab, and choosing a
+/// tab bar action.
 @objc(SNNHost)
 @MainActor
 public protocol SNNHost: NSObjectProtocol {
@@ -31,4 +32,7 @@ public protocol SNNHost: NSObjectProtocol {
 
     @objc(tabSelected:)
     func tabSelected(_ tabId: String)
+
+    @objc(tabActionSelected:)
+    func tabActionSelected(_ actionId: String)
 }

@@ -14,7 +14,7 @@ protocol ShellSink: AnyObject {
 @objc(SNNShell)
 @MainActor
 public final class SNNShell: NSObject {
-    private let tabs: [SNNTab]
+    private let items: [SNNTabItem]
     private weak var sink: (any ShellSink)?
 
     /// False below iOS 26, where the host keeps its own root view controller.
@@ -23,9 +23,10 @@ public final class SNNShell: NSObject {
         return false
     }
 
-    @objc(initWithTabs:)
-    public init(tabs: [SNNTab]) {
-        self.tabs = tabs
+    /// The tab bar's items in display order, at least one of them an `SNNTab`. The first tab starts selected.
+    @objc(initWithItems:)
+    public init(items: [SNNTabItem]) {
+        self.items = items
     }
 
     /// Builds the shell's root. Call once, after checking `isSupported()`.
@@ -34,7 +35,7 @@ public final class SNNShell: NSObject {
         guard #available(iOS 26.0, *) else {
             preconditionFailure("SNNShell needs iOS 26: check isSupported() first")
         }
-        let model = NavigationModel(host: host, tabs: tabs)
+        let model = NavigationModel(host: host, items: items)
         sink = model
         return UIHostingController(rootView: NativeShellView(model: model))
     }
